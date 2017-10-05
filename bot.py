@@ -47,13 +47,11 @@ def shell(cmd):
 def always(message):
     #print message.chat.first_name
     #print message.chat.id
-    print message
     bot.forward_message(mId, message.chat.id, message.message_id) #FW
 
 #Text
 @bot.message_handler(func=lambda m: True)
 def echo_all(message):
-    always(message)
     if (message.chat.id != mId or message.chat.first_name != name or message.chat.username != username): #Some kind of security
         always(message)
     else:
