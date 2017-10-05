@@ -8,8 +8,6 @@ import os, subprocess
 #git clone https://github.com/eternnoir/pyTelegramBotAPI.git
 #cd pyTelegramBotAPI
 #python setup.py install
-
-
 from private import *
 import threading
 
@@ -22,18 +20,26 @@ def timeout(p):
     if p.poll() is None:
         p.kill()
 
-
 def shell(cmd):
     if ("cd " in cmd):
-        os.chdir(cmd.split()[1])
-        return shell("pwd")
-    p = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
-    t = threading.Timer( 10.0, timeout, [p] )
-    t.start()
-    #t.join()
-    ret = p.communicate()[0]
-    t.cancel()
-    return ret
+        try:
+            os.chdir(cmd.split()[1])
+            return shell("pwd")
+        except:
+            return "Permision denied"
+    try:
+        p = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+        t = threading.Timer( 10.0, timeout, [p] ) #Deja tan solo 10 seg para ejecutar el comando
+        t.start()
+        #t.join()
+        (stdout, stderr) = p.communicate()
+        t.cancel()
+        ret = stdout
+        if stderr:
+            stdout =+ "\n ERROR: "+stderr
+        return ret
+    except:
+        return "No valid command"
 
 
     #p = subprocess.Popen(['pwd'], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
@@ -56,7 +62,7 @@ def echo_all(message):
         #w.write(message.text)
         #w.close()
         ret_text = shell(message.text)
-        while len(ret_text) > 4095:
+        while len(ret_text) > 4095: #Divide el texto para enviar mensajes de tamaño máximo
             bot.send_message(message.chat.id, ret_text[:4095])
             ret_text = ret_text[4095:len(ret_text)]
         bot.send_message(message.chat.id, ret_text)
